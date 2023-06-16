@@ -1,7 +1,7 @@
-from unifyml import math
-from unifyml.math import extrapolation, Extrapolation, Tensor
+from phi import math
+from phi.math import extrapolation, Extrapolation, Tensor
 
-from .mesh import UnstructuredMesh
+from phi.geom import UnstructuredMesh
 
 
 def at_faces(data: Tensor, mesh: UnstructuredMesh, extrapolation: Extrapolation, scheme='upwind-linear', upwind_vectors: Tensor = None, gradient: Tensor = None):
