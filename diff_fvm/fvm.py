@@ -50,13 +50,13 @@ def divergence(data: Tensor,
 def laplace(data: Tensor,
             mesh: UnstructuredMesh,
             prev_grad: Tensor) -> Tensor:
-    neighbor_val = mesh.pad_boundary(data.values, extrapolation)
-    connecting_grad = (mesh.connectivity * neighbor_val - data.values) / mesh.neighbor_distances
+    neighbor_val = mesh.pad_boundary(data, extrapolation)
+    connecting_grad = (mesh.connectivity * neighbor_val - data) / mesh.neighbor_distances
     if prev_grad is not None:  # skewness correction
         prev_grad = prev_grad.at_faces()
         n1 = (mesh.face_normals.vector @ mesh.neighbor_offsets.vector) * mesh.neighbor_offsets / mesh.neighbor_distances ** 2
         n2 = mesh.face_normals - n1
-        ortho_correction = prev_grad.values.vector @ n2.vector
+        ortho_correction = prev_grad.vector @ n2.vector
         grad = connecting_grad * math.vec_length(n1) + ortho_correction
     else:
         grad = connecting_grad
@@ -66,6 +66,6 @@ def laplace(data: Tensor,
 def convection(velocity: Tensor, mesh: UnstructuredMesh, prev_velocity: Tensor):  # https://youtu.be/E9_kyXjtRHc?t=1035
     velocity = velocity.at_faces(scheme='linear-upwind')
     prev_velocity = prev_velocity.at_faces(scheme='linear-upwind')
-    return mesh.integrate_surface(velocity.values * (prev_velocity.values.vector @ mesh.face_normals.vector))
-    # conv = math.sum(velocity.values * (prev_velocity.values.vector @ mesh.face_normals.vector) * mesh.face_areas, dual) / mesh.volume
+    return mesh.integrate_surface(velocity * (prev_velocity.vector @ mesh.face_normals.vector))
+    # conv = math.sum(velocity * (prev_velocity.vector @ mesh.face_normals.vector) * mesh.face_areas, dual) / mesh.volume
 
